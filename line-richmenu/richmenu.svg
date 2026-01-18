@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2500" height="1686" viewBox="0 0 2500 1686">
+  <defs>
+    <!-- 漸層背景 -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="50%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0a0a0f"/>
+    </linearGradient>
+    
+    <!-- 網格圖案 -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(5,217,232,0.08)" stroke-width="1"/>
+    </pattern>
+    
+    <!-- 各區塊漸層 -->
+    <linearGradient id="cellGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(5,217,232,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(5,217,232,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,42,109,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(255,42,109,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(1,255,112,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(1,255,112,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(211,0,197,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(211,0,197,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(249,240,2,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(249,240,2,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad6" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(5,217,232,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(5,217,232,0.02)"/>
+    </linearGradient>
+
+    <!-- 霓虹發光效果 -->
+    <filter id="glow1" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="2500" height="1686" fill="url(#bgGrad)"/>
+  <rect width="2500" height="1686" fill="url(#grid)"/>
+
+  <!-- 分隔線 -->
+  <line x1="833" y1="0" x2="833" y2="1686" stroke="rgba(5,217,232,0.3)" stroke-width="2"/>
+  <line x1="1667" y1="0" x2="1667" y2="1686" stroke="rgba(5,217,232,0.3)" stroke-width="2"/>
+  <line x1="0" y1="843" x2="2500" y2="843" stroke="rgba(5,217,232,0.3)" stroke-width="2"/>
+
+  <!-- ===== 第一格：語音翻譯 ===== -->
+  <rect x="0" y="0" width="833" height="843" fill="url(#cellGrad1)"/>
+  <!-- 角落裝飾 -->
+  <path d="M 20 50 L 20 20 L 50 20" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <path d="M 813 50 L 813 20 L 783 20" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <path d="M 20 793 L 20 823 L 50 823" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <path d="M 813 793 L 813 823 L 783 823" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <!-- 圖示 -->
+  <text x="416" y="320" font-size="140" text-anchor="middle" filter="url(#glow1)">🎤</text>
+  <!-- 標題 -->
+  <text x="416" y="480" font-family="sans-serif" font-size="56" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow1)">語音翻譯</text>
+  <text x="416" y="540" font-family="monospace" font-size="28" fill="#05d9e8" text-anchor="middle" letter-spacing="6">VOICE TRANSLATE</text>
+  <!-- 底部光線 -->
+  <rect x="166" y="820" width="500" height="3" fill="#05d9e8" opacity="0.6"/>
+
+  <!-- ===== 第二格：文字翻譯 ===== -->
+  <rect x="833" y="0" width="834" height="843" fill="url(#cellGrad2)"/>
+  <path d="M 853 50 L 853 20 L 883 20" fill="none" stroke="#ff2a6d" stroke-width="3"/>
+  <path d="M 1647 50 L 1647 20 L 1617 20" fill="none" stroke="#ff2a6d" stroke-width="3"/>
+  <path d="M 853 793 L 853 823 L 883 823" fill="none" stroke="#ff2a6d" stroke-width="3"/>
+  <path d="M 1647 793 L 1647 823 L 1617 823" fill="none" stroke="#ff2a6d" stroke-width="3"/>
+  <text x="1250" y="320" font-size="140" text-anchor="middle" filter="url(#glow1)">⌨️</text>
+  <text x="1250" y="480" font-family="sans-serif" font-size="56" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow1)">文字翻譯</text>
+  <text x="1250" y="540" font-family="monospace" font-size="28" fill="#ff2a6d" text-anchor="middle" letter-spacing="6">TEXT TRANSLATE</text>
+  <rect x="1000" y="820" width="500" height="3" fill="#ff2a6d" opacity="0.6"/>
+
+  <!-- ===== 第三格：切換語言 ===== -->
+  <rect x="1667" y="0" width="833" height="843" fill="url(#cellGrad3)"/>
+  <path d="M 1687 50 L 1687 20 L 1717 20" fill="none" stroke="#01ff70" stroke-width="3"/>
+  <path d="M 2480 50 L 2480 20 L 2450 20" fill="none" stroke="#01ff70" stroke-width="3"/>
+  <path d="M 1687 793 L 1687 823 L 1717 823" fill="none" stroke="#01ff70" stroke-width="3"/>
+  <path d="M 2480 793 L 2480 823 L 2450 823" fill="none" stroke="#01ff70" stroke-width="3"/>
+  <text x="2083" y="320" font-size="140" text-anchor="middle" filter="url(#glow1)">🌏</text>
+  <text x="2083" y="480" font-family="sans-serif" font-size="56" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow1)">切換語言</text>
+  <text x="2083" y="540" font-family="monospace" font-size="28" fill="#01ff70" text-anchor="middle" letter-spacing="6">LANGUAGE</text>
+  <rect x="1833" y="820" width="500" height="3" fill="#01ff70" opacity="0.6"/>
+
+  <!-- ===== 第四格：常用句 ===== -->
+  <rect x="0" y="843" width="833" height="843" fill="url(#cellGrad4)"/>
+  <path d="M 20 893 L 20 863 L 50 863" fill="none" stroke="#d300c5" stroke-width="3"/>
+  <path d="M 813 893 L 813 863 L 783 863" fill="none" stroke="#d300c5" stroke-width="3"/>
+  <path d="M 20 1636 L 20 1666 L 50 1666" fill="none" stroke="#d300c5" stroke-width="3"/>
+  <path d="M 813 1636 L 813 1666 L 783 1666" fill="none" stroke="#d300c5" stroke-width="3"/>
+  <text x="416" y="1163" font-size="140" text-anchor="middle" filter="url(#glow1)">💬</text>
+  <text x="416" y="1323" font-family="sans-serif" font-size="56" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow1)">常用句</text>
+  <text x="416" y="1383" font-family="monospace" font-size="28" fill="#d300c5" text-anchor="middle" letter-spacing="6">PHRASES</text>
+  <rect x="166" y="1663" width="500" height="3" fill="#d300c5" opacity="0.6"/>
+
+  <!-- ===== 第五格：翻譯歷史 ===== -->
+  <rect x="833" y="843" width="834" height="843" fill="url(#cellGrad5)"/>
+  <path d="M 853 893 L 853 863 L 883 863" fill="none" stroke="#f9f002" stroke-width="3"/>
+  <path d="M 1647 893 L 1647 863 L 1617 863" fill="none" stroke="#f9f002" stroke-width="3"/>
+  <path d="M 853 1636 L 853 1666 L 883 1666" fill="none" stroke="#f9f002" stroke-width="3"/>
+  <path d="M 1647 1636 L 1647 1666 L 1617 1666" fill="none" stroke="#f9f002" stroke-width="3"/>
+  <text x="1250" y="1163" font-size="140" text-anchor="middle" filter="url(#glow1)">📜</text>
+  <text x="1250" y="1323" font-family="sans-serif" font-size="56" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow1)">翻譯歷史</text>
+  <text x="1250" y="1383" font-family="monospace" font-size="28" fill="#f9f002" text-anchor="middle" letter-spacing="6">HISTORY</text>
+  <rect x="1000" y="1663" width="500" height="3" fill="#f9f002" opacity="0.6"/>
+
+  <!-- ===== 第六格：使用說明 ===== -->
+  <rect x="1667" y="843" width="833" height="843" fill="url(#cellGrad6)"/>
+  <path d="M 1687 893 L 1687 863 L 1717 863" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <path d="M 2480 893 L 2480 863 L 2450 863" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <path d="M 1687 1636 L 1687 1666 L 1717 1666" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <path d="M 2480 1636 L 2480 1666 L 2450 1666" fill="none" stroke="#05d9e8" stroke-width="3"/>
+  <text x="2083" y="1163" font-size="140" text-anchor="middle" filter="url(#glow1)">❓</text>
+  <text x="2083" y="1323" font-family="sans-serif" font-size="56" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow1)">使用說明</text>
+  <text x="2083" y="1383" font-family="monospace" font-size="28" fill="#05d9e8" text-anchor="middle" letter-spacing="6">HELP</text>
+  <rect x="1833" y="1663" width="500" height="3" fill="#05d9e8" opacity="0.6"/>
+
+</svg>

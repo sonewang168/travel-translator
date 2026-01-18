@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE Rich Menu - 賽博龐克風格</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700;900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #0a0a0f;
+        }
+
+        .rich-menu {
+            width: 2500px;
+            height: 1686px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 網格背景 */
+        .rich-menu::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(5, 217, 232, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(5, 217, 232, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            position: relative;
+            border: 1px solid rgba(5, 217, 232, 0.2);
+            transition: all 0.3s;
+            background: linear-gradient(180deg, 
+                rgba(5, 217, 232, 0.05) 0%, 
+                rgba(211, 0, 197, 0.05) 100%);
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, #05d9e8, #d300c5, #ff2a6d) 1;
+            opacity: 0.5;
+        }
+
+        /* 不同顏色主題 */
+        .menu-item:nth-child(1) { --accent: #05d9e8; }
+        .menu-item:nth-child(2) { --accent: #ff2a6d; }
+        .menu-item:nth-child(3) { --accent: #01ff70; }
+        .menu-item:nth-child(4) { --accent: #d300c5; }
+        .menu-item:nth-child(5) { --accent: #f9f002; }
+        .menu-item:nth-child(6) { --accent: #05d9e8; }
+
+        .menu-icon {
+            font-size: 120px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 20px var(--accent));
+        }
+
+        .menu-title {
+            font-size: 52px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 
+                0 0 10px var(--accent),
+                0 0 20px var(--accent),
+                2px 2px 0 var(--accent);
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+        }
+
+        .menu-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            opacity: 0.8;
+        }
+
+        /* 裝飾角落 */
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-color: var(--accent);
+            border-style: solid;
+            border-width: 0;
+        }
+        .corner.tl { top: 20px; left: 20px; border-top-width: 3px; border-left-width: 3px; }
+        .corner.tr { top: 20px; right: 20px; border-top-width: 3px; border-right-width: 3px; }
+        .corner.bl { bottom: 20px; left: 20px; border-bottom-width: 3px; border-left-width: 3px; }
+        .corner.br { bottom: 20px; right: 20px; border-bottom-width: 3px; border-right-width: 3px; }
+
+        /* 霓虹光效 */
+        .glow-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            height: 2px;
+            width: 60%;
+            bottom: 0;
+            left: 20%;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="rich-menu">
+        <!-- 1. 語音翻譯 -->
+        <div class="menu-item">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="menu-icon">🎤</div>
+            <div class="menu-title">語音翻譯</div>
+            <div class="menu-subtitle">Voice</div>
+            <div class="glow-line"></div>
+        </div>
+
+        <!-- 2. 文字翻譯 -->
+        <div class="menu-item">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="menu-icon">⌨️</div>
+            <div class="menu-title">文字翻譯</div>
+            <div class="menu-subtitle">Text</div>
+            <div class="glow-line"></div>
+        </div>
+
+        <!-- 3. 切換語言 -->
+        <div class="menu-item">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="menu-icon">🌏</div>
+            <div class="menu-title">切換語言</div>
+            <div class="menu-subtitle">Language</div>
+            <div class="glow-line"></div>
+        </div>
+
+        <!-- 4. 常用句 -->
+        <div class="menu-item">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="menu-icon">💬</div>
+            <div class="menu-title">常用句</div>
+            <div class="menu-subtitle">Phrases</div>
+            <div class="glow-line"></div>
+        </div>
+
+        <!-- 5. 翻譯歷史 -->
+        <div class="menu-item">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="menu-icon">📜</div>
+            <div class="menu-title">翻譯歷史</div>
+            <div class="menu-subtitle">History</div>
+            <div class="glow-line"></div>
+        </div>
+
+        <!-- 6. 使用說明 -->
+        <div class="menu-item">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="menu-icon">❓</div>
+            <div class="menu-title">使用說明</div>
+            <div class="menu-subtitle">Help</div>
+            <div class="glow-line"></div>
+        </div>
+    </div>
+</body>
+</html>

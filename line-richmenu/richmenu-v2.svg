@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2500" height="1686" viewBox="0 0 2500 1686">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="50%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0a0a0f"/>
+    </linearGradient>
+    
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(5,217,232,0.1)" stroke-width="1"/>
+    </pattern>
+    
+    <linearGradient id="cellGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(5,217,232,0.2)"/>
+      <stop offset="100%" style="stop-color:rgba(5,217,232,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,42,109,0.2)"/>
+      <stop offset="100%" style="stop-color:rgba(255,42,109,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(1,255,112,0.2)"/>
+      <stop offset="100%" style="stop-color:rgba(1,255,112,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(211,0,197,0.2)"/>
+      <stop offset="100%" style="stop-color:rgba(211,0,197,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(249,240,2,0.2)"/>
+      <stop offset="100%" style="stop-color:rgba(249,240,2,0.02)"/>
+    </linearGradient>
+    <linearGradient id="cellGrad6" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(5,217,232,0.2)"/>
+      <stop offset="100%" style="stop-color:rgba(5,217,232,0.02)"/>
+    </linearGradient>
+
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#05d9e8" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="2500" height="1686" fill="url(#bgGrad)"/>
+  <rect width="2500" height="1686" fill="url(#grid)"/>
+
+  <!-- 分隔線（霓虹效果） -->
+  <line x1="833" y1="0" x2="833" y2="1686" stroke="#05d9e8" stroke-width="2" opacity="0.5"/>
+  <line x1="1667" y1="0" x2="1667" y2="1686" stroke="#05d9e8" stroke-width="2" opacity="0.5"/>
+  <line x1="0" y1="843" x2="2500" y2="843" stroke="#05d9e8" stroke-width="2" opacity="0.5"/>
+
+  <!-- ===== 第一格：語音翻譯 ===== -->
+  <rect x="0" y="0" width="833" height="843" fill="url(#cellGrad1)"/>
+  <!-- 角落裝飾 -->
+  <path d="M 25 60 L 25 25 L 60 25" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <path d="M 808 60 L 808 25 L 773 25" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <path d="M 25 783 L 25 818 L 60 818" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <path d="M 808 783 L 808 818 L 773 818" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <!-- 麥克風圖示 -->
+  <g transform="translate(416, 280)" filter="url(#neon)">
+    <rect x="-35" y="-80" width="70" height="110" rx="35" fill="none" stroke="#05d9e8" stroke-width="8"/>
+    <path d="M -55 50 Q -55 110 0 110 Q 55 110 55 50" fill="none" stroke="#05d9e8" stroke-width="8"/>
+    <line x1="0" y1="110" x2="0" y2="150" stroke="#05d9e8" stroke-width="8"/>
+    <line x1="-40" y1="150" x2="40" y2="150" stroke="#05d9e8" stroke-width="8"/>
+  </g>
+  <!-- 標題 -->
+  <text x="416" y="500" font-family="sans-serif" font-size="72" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow)">語音翻譯</text>
+  <text x="416" y="570" font-family="monospace" font-size="32" fill="#05d9e8" text-anchor="middle" letter-spacing="8">VOICE</text>
+  <!-- 底部光線 -->
+  <rect x="166" y="815" width="500" height="4" fill="#05d9e8" opacity="0.8"/>
+
+  <!-- ===== 第二格：文字翻譯 ===== -->
+  <rect x="833" y="0" width="834" height="843" fill="url(#cellGrad2)"/>
+  <path d="M 858 60 L 858 25 L 893 25" fill="none" stroke="#ff2a6d" stroke-width="4"/>
+  <path d="M 1642 60 L 1642 25 L 1607 25" fill="none" stroke="#ff2a6d" stroke-width="4"/>
+  <path d="M 858 783 L 858 818 L 893 818" fill="none" stroke="#ff2a6d" stroke-width="4"/>
+  <path d="M 1642 783 L 1642 818 L 1607 818" fill="none" stroke="#ff2a6d" stroke-width="4"/>
+  <!-- 鍵盤圖示 -->
+  <g transform="translate(1250, 280)" filter="url(#glow)">
+    <rect x="-90" y="-60" width="180" height="120" rx="10" fill="none" stroke="#ff2a6d" stroke-width="8"/>
+    <rect x="-70" y="-40" width="30" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="-30" y="-40" width="30" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="10" y="-40" width="30" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="50" y="-40" width="20" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="-70" y="0" width="30" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="-30" y="0" width="30" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="10" y="0" width="30" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="50" y="0" width="20" height="25" rx="3" fill="#ff2a6d" opacity="0.5"/>
+    <rect x="-50" y="40" width="100" height="20" rx="3" fill="#ff2a6d" opacity="0.5"/>
+  </g>
+  <text x="1250" y="500" font-family="sans-serif" font-size="72" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow)">文字翻譯</text>
+  <text x="1250" y="570" font-family="monospace" font-size="32" fill="#ff2a6d" text-anchor="middle" letter-spacing="8">TEXT</text>
+  <rect x="1000" y="815" width="500" height="4" fill="#ff2a6d" opacity="0.8"/>
+
+  <!-- ===== 第三格：切換語言 ===== -->
+  <rect x="1667" y="0" width="833" height="843" fill="url(#cellGrad3)"/>
+  <path d="M 1692 60 L 1692 25 L 1727 25" fill="none" stroke="#01ff70" stroke-width="4"/>
+  <path d="M 2475 60 L 2475 25 L 2440 25" fill="none" stroke="#01ff70" stroke-width="4"/>
+  <path d="M 1692 783 L 1692 818 L 1727 818" fill="none" stroke="#01ff70" stroke-width="4"/>
+  <path d="M 2475 783 L 2475 818 L 2440 818" fill="none" stroke="#01ff70" stroke-width="4"/>
+  <!-- 地球圖示 -->
+  <g transform="translate(2083, 280)" filter="url(#glow)">
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#01ff70" stroke-width="8"/>
+    <ellipse cx="0" cy="0" rx="40" ry="80" fill="none" stroke="#01ff70" stroke-width="4"/>
+    <line x1="-80" y1="0" x2="80" y2="0" stroke="#01ff70" stroke-width="4"/>
+    <path d="M -70 -40 Q 0 -30 70 -40" fill="none" stroke="#01ff70" stroke-width="4"/>
+    <path d="M -70 40 Q 0 30 70 40" fill="none" stroke="#01ff70" stroke-width="4"/>
+  </g>
+  <text x="2083" y="500" font-family="sans-serif" font-size="72" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow)">切換語言</text>
+  <text x="2083" y="570" font-family="monospace" font-size="32" fill="#01ff70" text-anchor="middle" letter-spacing="8">LANGUAGE</text>
+  <rect x="1833" y="815" width="500" height="4" fill="#01ff70" opacity="0.8"/>
+
+  <!-- ===== 第四格：常用句 ===== -->
+  <rect x="0" y="843" width="833" height="843" fill="url(#cellGrad4)"/>
+  <path d="M 25 903 L 25 868 L 60 868" fill="none" stroke="#d300c5" stroke-width="4"/>
+  <path d="M 808 903 L 808 868 L 773 868" fill="none" stroke="#d300c5" stroke-width="4"/>
+  <path d="M 25 1626 L 25 1661 L 60 1661" fill="none" stroke="#d300c5" stroke-width="4"/>
+  <path d="M 808 1626 L 808 1661 L 773 1661" fill="none" stroke="#d300c5" stroke-width="4"/>
+  <!-- 對話泡泡圖示 -->
+  <g transform="translate(416, 1123)" filter="url(#glow)">
+    <path d="M -70 -60 L 70 -60 Q 90 -60 90 -40 L 90 30 Q 90 50 70 50 L 10 50 L -20 80 L -20 50 L -70 50 Q -90 50 -90 30 L -90 -40 Q -90 -60 -70 -60 Z" fill="none" stroke="#d300c5" stroke-width="8"/>
+    <line x1="-50" y1="-25" x2="50" y2="-25" stroke="#d300c5" stroke-width="6" opacity="0.6"/>
+    <line x1="-50" y1="5" x2="30" y2="5" stroke="#d300c5" stroke-width="6" opacity="0.6"/>
+  </g>
+  <text x="416" y="1343" font-family="sans-serif" font-size="72" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow)">常用句</text>
+  <text x="416" y="1413" font-family="monospace" font-size="32" fill="#d300c5" text-anchor="middle" letter-spacing="8">PHRASES</text>
+  <rect x="166" y="1658" width="500" height="4" fill="#d300c5" opacity="0.8"/>
+
+  <!-- ===== 第五格：翻譯歷史 ===== -->
+  <rect x="833" y="843" width="834" height="843" fill="url(#cellGrad5)"/>
+  <path d="M 858 903 L 858 868 L 893 868" fill="none" stroke="#f9f002" stroke-width="4"/>
+  <path d="M 1642 903 L 1642 868 L 1607 868" fill="none" stroke="#f9f002" stroke-width="4"/>
+  <path d="M 858 1626 L 858 1661 L 893 1661" fill="none" stroke="#f9f002" stroke-width="4"/>
+  <path d="M 1642 1626 L 1642 1661 L 1607 1661" fill="none" stroke="#f9f002" stroke-width="4"/>
+  <!-- 捲軸圖示 -->
+  <g transform="translate(1250, 1123)" filter="url(#glow)">
+    <rect x="-50" y="-80" width="100" height="160" rx="5" fill="none" stroke="#f9f002" stroke-width="8"/>
+    <line x1="-30" y1="-50" x2="30" y2="-50" stroke="#f9f002" stroke-width="6" opacity="0.6"/>
+    <line x1="-30" y1="-20" x2="30" y2="-20" stroke="#f9f002" stroke-width="6" opacity="0.6"/>
+    <line x1="-30" y1="10" x2="30" y2="10" stroke="#f9f002" stroke-width="6" opacity="0.6"/>
+    <line x1="-30" y1="40" x2="15" y2="40" stroke="#f9f002" stroke-width="6" opacity="0.6"/>
+    <circle cx="60" cy="-90" r="20" fill="none" stroke="#f9f002" stroke-width="6"/>
+    <circle cx="60" cy="90" r="20" fill="none" stroke="#f9f002" stroke-width="6"/>
+  </g>
+  <text x="1250" y="1343" font-family="sans-serif" font-size="72" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow)">翻譯歷史</text>
+  <text x="1250" y="1413" font-family="monospace" font-size="32" fill="#f9f002" text-anchor="middle" letter-spacing="8">HISTORY</text>
+  <rect x="1000" y="1658" width="500" height="4" fill="#f9f002" opacity="0.8"/>
+
+  <!-- ===== 第六格：使用說明 ===== -->
+  <rect x="1667" y="843" width="833" height="843" fill="url(#cellGrad6)"/>
+  <path d="M 1692 903 L 1692 868 L 1727 868" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <path d="M 2475 903 L 2475 868 L 2440 868" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <path d="M 1692 1626 L 1692 1661 L 1727 1661" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <path d="M 2475 1626 L 2475 1661 L 2440 1661" fill="none" stroke="#05d9e8" stroke-width="4"/>
+  <!-- 問號圖示 -->
+  <g transform="translate(2083, 1123)" filter="url(#neon)">
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#05d9e8" stroke-width="8"/>
+    <text x="0" y="30" font-family="sans-serif" font-size="120" font-weight="bold" fill="#05d9e8" text-anchor="middle">?</text>
+  </g>
+  <text x="2083" y="1343" font-family="sans-serif" font-size="72" font-weight="bold" fill="#fff" text-anchor="middle" filter="url(#glow)">使用說明</text>
+  <text x="2083" y="1413" font-family="monospace" font-size="32" fill="#05d9e8" text-anchor="middle" letter-spacing="8">HELP</text>
+  <rect x="1833" y="1658" width="500" height="4" fill="#05d9e8" opacity="0.8"/>
+
+</svg>

@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <title>旅遊~即時翻譯</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyber-pink: #ff2a6d;
+            --cyber-blue: #05d9e8;
+            --cyber-purple: #d300c5;
+            --cyber-yellow: #f9f002;
+            --cyber-green: #01ff70;
+            --dark-bg: #0a0a0f;
+            --grid-color: rgba(5, 217, 232, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--dark-bg);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ===== 開機動畫 ===== */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .splash-screen.fade-out {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        /* 網格背景 */
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            perspective: 500px;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        /* 掃描線效果 */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0px,
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 3D 翻字容器 */
+        .logo-3d-container {
+            perspective: 1000px;
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+
+        .logo-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate3d 4s ease-in-out infinite;
+        }
+
+        @keyframes rotate3d {
+            0%, 100% { 
+                transform: rotateY(0deg) rotateX(0deg); 
+            }
+            25% { 
+                transform: rotateY(180deg) rotateX(10deg); 
+            }
+            50% { 
+                transform: rotateY(360deg) rotateX(0deg); 
+            }
+            75% { 
+                transform: rotateY(540deg) rotateX(-10deg); 
+            }
+        }
+
+        .logo-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 120px;
+            font-weight: 900;
+            backface-visibility: visible;
+            border: 3px solid var(--cyber-blue);
+            background: linear-gradient(135deg, 
+                rgba(5, 217, 232, 0.2) 0%, 
+                rgba(211, 0, 197, 0.2) 50%,
+                rgba(255, 42, 109, 0.2) 100%);
+            box-shadow: 
+                0 0 30px rgba(5, 217, 232, 0.5),
+                inset 0 0 30px rgba(5, 217, 232, 0.1);
+        }
+
+        .logo-face.front {
+            transform: translateZ(50px);
+            color: var(--cyber-blue);
+            text-shadow: 
+                0 0 10px var(--cyber-blue),
+                0 0 20px var(--cyber-blue),
+                0 0 40px var(--cyber-blue),
+                0 0 80px var(--cyber-purple);
+        }
+
+        .logo-face.back {
+            transform: rotateY(180deg) translateZ(50px);
+            color: var(--cyber-pink);
+            text-shadow: 
+                0 0 10px var(--cyber-pink),
+                0 0 20px var(--cyber-pink),
+                0 0 40px var(--cyber-pink),
+                0 0 80px var(--cyber-purple);
+        }
+
+        .logo-face.left {
+            transform: rotateY(-90deg) translateZ(100px);
+            width: 100px;
+            left: 50px;
+            border-color: var(--cyber-purple);
+            background: linear-gradient(180deg, 
+                rgba(211, 0, 197, 0.3) 0%, 
+                rgba(5, 217, 232, 0.1) 100%);
+        }
+
+        .logo-face.right {
+            transform: rotateY(90deg) translateZ(100px);
+            width: 100px;
+            left: 50px;
+            border-color: var(--cyber-purple);
+            background: linear-gradient(180deg, 
+                rgba(211, 0, 197, 0.1) 0%, 
+                rgba(255, 42, 109, 0.3) 100%);
+        }
+
+        /* 霓虹光暈 */
+        .neon-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(5, 217, 232, 0.3) 0%,
+                rgba(211, 0, 197, 0.2) 30%,
+                transparent 70%);
+            animation: pulse 2s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        /* 標題文字 */
+        .splash-title {
+            margin-top: 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: var(--cyber-blue);
+            text-shadow: 
+                0 0 10px var(--cyber-blue),
+                0 0 20px var(--cyber-blue);
+            animation: textGlitch 3s infinite;
+        }
+
+        .splash-subtitle {
+            margin-top: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 
+                2px 2px 0 var(--cyber-pink),
+                -2px -2px 0 var(--cyber-blue);
+            animation: subtitleFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes textGlitch {
+            0%, 90%, 100% { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+            92% { 
+                opacity: 0.8; 
+                transform: translateX(-2px);
+                text-shadow: 
+                    0 0 10px var(--cyber-pink),
+                    0 0 20px var(--cyber-pink);
+            }
+            94% { 
+                opacity: 1; 
+                transform: translateX(2px);
+            }
+        }
+
+        @keyframes subtitleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* 載入進度條 */
+        .loading-bar {
+            margin-top: 40px;
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                var(--cyber-blue) 0%, 
+                var(--cyber-purple) 50%, 
+                var(--cyber-pink) 100%);
+            width: 0%;
+            animation: loadProgress 2.5s ease-out forwards;
+            box-shadow: 0 0 10px var(--cyber-blue);
+        }
+
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            50% { width: 60%; }
+            80% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--cyber-green);
+            letter-spacing: 2px;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 粒子效果 */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--cyber-blue);
+            border-radius: 50%;
+            animation: particleFloat 8s infinite linear;
+            box-shadow: 0 0 10px var(--cyber-blue);
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* ===== 主應用程式 ===== */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(180deg, 
+                #0a0a0f 0%, 
+                #1a1a2e 50%, 
+                #0a0a0f 100%);
+            padding: 20px;
+            padding-top: env(safe-area-inset-top, 20px);
+            padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px));
+        }
+
+        .app-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 頂部標題列 */
+        .app-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .app-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--cyber-blue), var(--cyber-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 6px 16px;
+            background: rgba(1, 255, 112, 0.15);
+            border: 1px solid var(--cyber-green);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--cyber-green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyber-green);
+            border-radius: 50%;
+            animation: statusPulse 1.5s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(1, 255, 112, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(1, 255, 112, 0); }
+        }
+
+        /* 翻譯結果區 */
+        .translation-display {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(5, 217, 232, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 120px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .translation-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(5, 217, 232, 0.1), 
+                transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+
+        .translation-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #fff;
+            min-height: 60px;
+        }
+
+        .translation-placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+        }
+
+        /* 語音波形 */
+        .waveform-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 60px;
+            margin: 20px 0;
+        }
+
+        .wave-bar {
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, var(--cyber-blue), var(--cyber-purple));
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .wave-bar:nth-child(1) { animation-delay: 0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+        .wave-bar:nth-child(6) { animation-delay: 0.5s; }
+        .wave-bar:nth-child(7) { animation-delay: 0.4s; }
+        .wave-bar:nth-child(8) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(9) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(10) { animation-delay: 0.1s; }
+
+        @keyframes wave {
+            0%, 100% { height: 20px; }
+            50% { height: 50px; }
+        }
+
+        .waveform-container.idle .wave-bar {
+            animation: none;
+            height: 20px;
+        }
+
+        /* 錄音按鈕 */
+        .record-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--cyber-pink);
+            background: linear-gradient(135deg, 
+                rgba(255, 42, 109, 0.3) 0%, 
+                rgba(211, 0, 197, 0.3) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 20px rgba(255, 42, 109, 0.3),
+                inset 0 0 20px rgba(255, 42, 109, 0.1);
+        }
+
+        .record-btn:active {
+            transform: scale(0.95);
+        }
+
+        .record-btn.recording {
+            animation: recordPulse 1s infinite;
+            border-color: var(--cyber-green);
+            box-shadow: 
+                0 0 30px rgba(1, 255, 112, 0.5),
+                inset 0 0 20px rgba(1, 255, 112, 0.2);
+        }
+
+        @keyframes recordPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .record-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--cyber-pink);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .record-btn.recording .record-icon {
+            background: var(--cyber-green);
+            border-radius: 6px;
+            width: 24px;
+            height: 24px;
+        }
+
+        /* 語言選擇區 */
+        .language-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .language-hint {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px;
+        }
+
+        .language-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-select-wrapper {
+            flex: 1;
+        }
+
+        .language-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .language-select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(5, 217, 232, 0.1);
+            border: 1px solid rgba(5, 217, 232, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            font-family: 'Noto Sans TC', sans-serif;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2305d9e8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .language-select:focus {
+            outline: none;
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 15px rgba(5, 217, 232, 0.3);
+        }
+
+        .swap-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--cyber-purple);
+            background: rgba(211, 0, 197, 0.2);
+            color: var(--cyber-purple);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .swap-btn:active {
+            transform: rotate(180deg);
+            background: rgba(211, 0, 197, 0.4);
+        }
+
+        /* 快速語言選擇 */
+        .quick-languages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .quick-lang-btn {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-lang-btn:active,
+        .quick-lang-btn.active {
+            background: rgba(5, 217, 232, 0.2);
+            border-color: var(--cyber-blue);
+            color: var(--cyber-blue);
+        }
+
+        /* 底部導航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(70px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            background: rgba(10, 10, 15, 0.95);
+            border-top: 1px solid rgba(5, 217, 232, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding-top: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 5px 15px;
+        }
+
+        .nav-item.active {
+            color: var(--cyber-blue);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+        }
+
+        /* LINE 連結提示 */
+        .line-hint {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, 
+                rgba(0, 185, 0, 0.2) 0%, 
+                rgba(0, 185, 0, 0.1) 100%);
+            border: 1px solid #00b900;
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { 
+                transform: translateY(100px); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateY(0); 
+                opacity: 1; 
+            }
+        }
+
+        .line-hint-icon {
+            font-size: 28px;
+        }
+
+        .line-hint-text {
+            flex: 1;
+            font-size: 13px;
+            color: #fff;
+        }
+
+        .line-hint-close {
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 開機動畫 -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="cyber-grid"></div>
+        <div class="scanlines"></div>
+        <div class="particles" id="particles"></div>
+        
+        <div class="neon-glow"></div>
+        <div class="logo-3d-container">
+            <div class="logo-3d">
+                <div class="logo-face front">翻</div>
+                <div class="logo-face back">譯</div>
+                <div class="logo-face left"></div>
+                <div class="logo-face right"></div>
+            </div>
+        </div>
+        
+        <div class="splash-title">TRAVEL TRANSLATOR</div>
+        <div class="splash-subtitle">旅遊~即時翻譯</div>
+        
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+        <div class="loading-text">INITIALIZING SYSTEM...</div>
+    </div>
+
+    <!-- 主應用程式 -->
+    <div class="app-container" id="appContainer">
+        <div class="app-header">
+            <h1>🌏 旅遊~即時翻譯</h1>
+            <div class="connection-status">
+                <div class="status-dot"></div>
+                <span>Connected</span>
+            </div>
+        </div>
+
+        <div class="translation-display">
+            <div class="translation-text" id="translationText">
+                <span class="translation-placeholder">翻譯字幕會顯示在這裡...</span>
+            </div>
+        </div>
+
+        <div class="waveform-container idle" id="waveform">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+        </div>
+
+        <div class="record-btn" id="recordBtn">
+            <div class="record-icon"></div>
+        </div>
+
+        <div class="language-section">
+            <div class="language-hint">雙向翻譯：說 A 語言自動翻成 B，說 B 語言自動翻成 A</div>
+            
+            <div class="language-row">
+                <div class="language-select-wrapper">
+                    <span class="language-label">語言 A</span>
+                    <select class="language-select" id="langA">
+                        <option value="zh-TW">🇹🇼 繁體中文</option>
+                        <option value="zh-CN">🇨🇳 簡體中文</option>
+                        <option value="en-US">🇺🇸 英文</option>
+                        <option value="ja-JP">🇯🇵 日文</option>
+                        <option value="ko-KR">🇰🇷 韓文</option>
+                        <option value="es-ES">🇪🇸 西班牙文</option>
+                        <option value="fr-FR">🇫🇷 法文</option>
+                        <option value="de-DE">🇩🇪 德文</option>
+                        <option value="it-IT">🇮🇹 義大利文</option>
+                        <option value="pt-PT">🇵🇹 葡萄牙文</option>
+                        <option value="ru-RU">🇷🇺 俄文</option>
+                        <option value="nl-NL">🇳🇱 荷蘭文</option>
+                        <option value="th-TH">🇹🇭 泰文</option>
+                        <option value="vi-VN">🇻🇳 越南文</option>
+                        <option value="id-ID">🇮🇩 印尼文</option>
+                        <option value="hi-IN">🇮🇳 印地文</option>
+                        <option value="ar-SA">🇸🇦 阿拉伯文</option>
+                        <option value="he-IL">🇮🇱 希伯來文</option>
+                        <option value="tr-TR">🇹🇷 土耳其文</option>
+                        <option value="pl-PL">🇵🇱 波蘭文</option>
+                    </select>
+                </div>
+
+                <div class="swap-btn" id="swapBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/>
+                    </svg>
+                </div>
+
+                <div class="language-select-wrapper">
+                    <span class="language-label">語言 B</span>
+                    <select class="language-select" id="langB">
+                        <option value="en-US">🇺🇸 英文</option>
+                        <option value="zh-TW">🇹🇼 繁體中文</option>
+                        <option value="zh-CN">🇨🇳 簡體中文</option>
+                        <option value="ja-JP">🇯🇵 日文</option>
+                        <option value="ko-KR">🇰🇷 韓文</option>
+                        <option value="es-ES">🇪🇸 西班牙文</option>
+                        <option value="fr-FR">🇫🇷 法文</option>
+                        <option value="de-DE">🇩🇪 德文</option>
+                        <option value="it-IT">🇮🇹 義大利文</option>
+                        <option value="pt-PT">🇵🇹 葡萄牙文</option>
+                        <option value="ru-RU">🇷🇺 俄文</option>
+                        <option value="nl-NL">🇳🇱 荷蘭文</option>
+                        <option value="th-TH">🇹🇭 泰文</option>
+                        <option value="vi-VN">🇻🇳 越南文</option>
+                        <option value="id-ID">🇮🇩 印尼文</option>
+                        <option value="hi-IN">🇮🇳 印地文</option>
+                        <option value="ar-SA">🇸🇦 阿拉伯文</option>
+                        <option value="he-IL">🇮🇱 希伯來文</option>
+                        <option value="tr-TR">🇹🇷 土耳其文</option>
+                        <option value="pl-PL">🇵🇱 波蘭文</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="quick-languages">
+                <button class="quick-lang-btn" data-lang="en-US">🇺🇸 英</button>
+                <button class="quick-lang-btn" data-lang="ja-JP">🇯🇵 日</button>
+                <button class="quick-lang-btn" data-lang="ko-KR">🇰🇷 韓</button>
+                <button class="quick-lang-btn" data-lang="es-ES">🇪🇸 西</button>
+                <button class="quick-lang-btn" data-lang="th-TH">🇹🇭 泰</button>
+                <button class="quick-lang-btn" data-lang="vi-VN">🇻🇳 越</button>
+            </div>
+        </div>
+
+        <!-- LINE 連結提示 -->
+        <div class="line-hint" id="lineHint" style="display: none;">
+            <span class="line-hint-icon">💬</span>
+            <div class="line-hint-text">
+                加入 LINE 好友，隨時隨地使用翻譯功能！
+            </div>
+            <span class="line-hint-close" onclick="document.getElementById('lineHint').style.display='none'">✕</span>
+        </div>
+
+        <!-- 底部導航 -->
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <span class="nav-icon">🎤</span>
+                <span>翻譯</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📝</span>
+                <span>歷史</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">💬</span>
+                <span>LINE</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span>設定</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 生成粒子
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#05d9e8', '#ff2a6d', '#d300c5', '#f9f002'];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (5 + Math.random() * 5) + 's';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
+                container.appendChild(particle);
+            }
+        }
+
+        // 開機動畫結束後顯示主程式
+        function initApp() {
+            createParticles();
+            
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                const app = document.getElementById('appContainer');
+                
+                splash.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    app.classList.add('active');
+                    
+                    // 顯示 LINE 提示
+                    setTimeout(() => {
+                        document.getElementById('lineHint').style.display = 'flex';
+                    }, 1000);
+                }, 800);
+            }, 3000);
+        }
+
+        // 錄音功能
+        const recordBtn = document.getElementById('recordBtn');
+        const waveform = document.getElementById('waveform');
+        const translationText = document.getElementById('translationText');
+        let isRecording = false;
+
+        recordBtn.addEventListener('click', () => {
+            isRecording = !isRecording;
+            recordBtn.classList.toggle('recording', isRecording);
+            waveform.classList.toggle('idle', !isRecording);
+            
+            if (isRecording) {
+                translationText.innerHTML = '<span style="color: var(--cyber-green);">🎤 正在聆聽...</span>';
+            } else {
+                translationText.innerHTML = '<span class="translation-placeholder">翻譯字幕會顯示在這裡...</span>';
+            }
+        });
+
+        // 交換語言
+        document.getElementById('swapBtn').addEventListener('click', () => {
+            const langA = document.getElementById('langA');
+            const langB = document.getElementById('langB');
+            const temp = langA.value;
+            langA.value = langB.value;
+            langB.value = temp;
+        });
+
+        // 快速語言選擇
+        document.querySelectorAll('.quick-lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                document.getElementById('langB').value = lang;
+                
+                document.querySelectorAll('.quick-lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // PWA 安裝
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        // 啟動
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

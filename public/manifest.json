@@ -1,0 +1,87 @@
+{
+    "name": "旅遊~即時翻譯",
+    "short_name": "旅遊翻譯",
+    "description": "20種語言即時語音翻譯，出國旅遊必備工具",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0f",
+    "theme_color": "#05d9e8",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "icons/icon-72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "icons/icon-96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "icons/icon-128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "icons/icon-144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "icons/icon-152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "icons/icon-384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable any"
+        }
+    ],
+    "categories": ["utilities", "travel"],
+    "lang": "zh-TW",
+    "dir": "ltr",
+    "screenshots": [
+        {
+            "src": "screenshots/screen1.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "開始翻譯",
+            "short_name": "翻譯",
+            "description": "快速啟動語音翻譯",
+            "url": "/?action=translate",
+            "icons": [{"src": "icons/translate-shortcut.png", "sizes": "96x96"}]
+        },
+        {
+            "name": "翻譯歷史",
+            "short_name": "歷史",
+            "description": "查看翻譯記錄",
+            "url": "/?action=history",
+            "icons": [{"src": "icons/history-shortcut.png", "sizes": "96x96"}]
+        }
+    ]
+}
