@@ -1,7 +1,8 @@
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// 取得 API Key 並移除多餘空白
+const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || '').trim();
 
 /**
  * 使用 OpenAI Whisper API 進行語音轉文字
@@ -24,6 +25,9 @@ async function transcribeAudio(audioBuffer, filename = 'audio.m4a') {
     formData.append('model', 'whisper-1');
     formData.append('response_format', 'verbose_json');
     
+    // 提示詞，幫助辨識繁體中文
+    formData.append('prompt', '請使用繁體中文。這是一段旅遊相關的對話。');
+    
     try {
         const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST',
@@ -41,7 +45,7 @@ async function transcribeAudio(audioBuffer, filename = 'audio.m4a') {
         }
         
         const data = await response.json();
-        console.log('Whisper 辨識結果:', data);
+        console.log('Whisper 辨識結果:', data.text);
         
         return {
             text: data.text || '',
@@ -50,14 +54,13 @@ async function transcribeAudio(audioBuffer, filename = 'audio.m4a') {
         };
         
     } catch (error) {
-        console.error('Whisper 語音辨識失敗:', error);
+        console.error('Whisper 語音辨識失敗:', error.message);
         throw error;
     }
 }
 
 /**
- * 偵測語音語言
- * Whisper 支援的語言代碼對照
+ * Whisper 語言代碼對照
  */
 const whisperLangMap = {
     'chinese': 'zh-TW',
