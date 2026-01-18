@@ -592,6 +592,15 @@
                 if (final) {
                     translateText(final);
                     if (isIOS) stopRecording(); // iOS 單次模式，辨識完就停止
+                } else if (isIOS && interim) {
+                    // iOS 有時只有 interim 沒有 final，延遲後自動翻譯
+                    clearTimeout(window.iosTranslateTimeout);
+                    window.iosTranslateTimeout = setTimeout(() => {
+                        if (currentOriginal && !document.getElementById('translatedText').textContent.includes('翻譯中')) {
+                            console.log('iOS 延遲翻譯:', currentOriginal);
+                            translateText(currentOriginal);
+                        }
+                    }, 1500);
                 }
             };
             
@@ -668,6 +677,12 @@
             document.getElementById('recordBtn').classList.remove('recording');
             document.getElementById('waveform').classList.remove('active');
             document.getElementById('recordHint').textContent = '點擊開始語音輸入';
+            
+            // iOS 停止錄音時，如果有辨識到文字但還沒翻譯，自動翻譯
+            if (currentOriginal && document.getElementById('translatedText').textContent === '翻譯結果會顯示在這裡') {
+                console.log('停止錄音，自動翻譯:', currentOriginal);
+                translateText(currentOriginal);
+            }
         }
 
         async function translateText(text) {
