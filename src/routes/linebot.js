@@ -16,6 +16,10 @@ const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN
 // 使用者設定儲存 (生產環境建議用 Redis)
 const userSettings = new Map();
 
+// 翻譯歷史儲存 (每個用戶最多保留 20 筆)
+const userHistory = new Map();
+const MAX_HISTORY = 20;
+
 // 語言名稱對照
 const langNames = {
     '中文': 'zh-TW', '繁中': 'zh-TW', '繁體': 'zh-TW', '台灣': 'zh-TW',
@@ -153,6 +157,72 @@ async function handleMessage(event) {
             return;
         }
         
+        // 處理重播指令
+        const replayMatch = text.match(/^重播\s*(\d+)$/);
+        if (replayMatch) {
+            const index = parseInt(replayMatch[1]) - 1;
+            const history = getHistory(userId);
+            if (index >= 0 && index < history.length) {
+                const item = history[index];
+                try {
+                    const tts = await textToSpeech(item.translated, item.to);
+                    const audioUrl = `${BASE_URL}/audio/${tts.filename}`;
+                    await replyMessage(replyToken, [
+                        {
+                            type: 'text',
+                            text: `🔄 重播第 ${index + 1} 筆\n\n${item.original}\n→ ${item.translated}`
+                        },
+                        {
+                            type: 'audio',
+                            originalContentUrl: audioUrl,
+                            duration: tts.duration
+                        }
+                    ]);
+                } catch (e) {
+                    console.error('重播 TTS 失敗:', e);
+                    await replyMessage(replyToken, [{
+                        type: 'text',
+                        text: `🔄 重播第 ${index + 1} 筆\n\n${item.original}\n→ ${item.translated}\n\n❌ 語音生成失敗`
+                    }]);
+                }
+            } else {
+                await replyMessage(replyToken, [{
+                    type: 'text',
+                    text: `❌ 找不到第 ${index + 1} 筆記錄\n\n輸入「翻譯歷史」查看記錄`
+                }]);
+            }
+            return;
+        }
+        
+        // 處理詳細指令
+        const detailMatch = text.match(/^詳細\s*(\d+)$/);
+        if (detailMatch) {
+            const index = parseInt(detailMatch[1]) - 1;
+            const history = getHistory(userId);
+            if (index >= 0 && index < history.length) {
+                const item = history[index];
+                const icon = item.type === 'voice' ? '🎤' : '⌨️';
+                const fromName = getLangDisplayName(item.from);
+                const toName = getLangDisplayName(item.to);
+                const timeStr = item.time.toLocaleString('zh-TW', { 
+                    month: 'numeric', 
+                    day: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                await replyMessage(replyToken, [{
+                    type: 'text',
+                    text: `📜 第 ${index + 1} 筆詳細\n\n${icon} ${fromName} → ${toName}\n🕐 ${timeStr}\n\n【原文】\n${item.original}\n\n【翻譯】\n${item.translated}\n\n💡 輸入「重播 ${index + 1}」可播放語音`
+                }]);
+            } else {
+                await replyMessage(replyToken, [{
+                    type: 'text',
+                    text: `❌ 找不到第 ${index + 1} 筆記錄\n\n輸入「翻譯歷史」查看記錄`
+                }]);
+            }
+            return;
+        }
+        
         try {
             // 偵測語言並自動切換方向
             const isSourceLang = detectLanguage(text, settings.from);
@@ -161,6 +231,16 @@ async function handleMessage(event) {
             
             // 翻譯文字
             const result = await translateText(text, actualFrom, actualTo);
+            
+            // 儲存翻譯歷史
+            addHistory(userId, {
+                original: text,
+                translated: result.translated,
+                from: actualFrom,
+                to: actualTo,
+                type: 'text',
+                time: new Date()
+            });
             
             await replyMessage(replyToken, [
                 { 
@@ -251,6 +331,16 @@ async function handleAudioMessage(event, replyToken, settings) {
         const actualTo = isFromA ? settings.to : settings.from;
         
         const result = await translateText(transcription.text, actualFrom, actualTo);
+        
+        // 儲存翻譯歷史
+        addHistory(event.source.userId, {
+            original: transcription.text,
+            translated: result.translated,
+            from: actualFrom,
+            to: actualTo,
+            type: 'voice',
+            time: new Date()
+        });
         
         // 4. 生成翻譯結果的語音
         let messages = [{
@@ -417,15 +507,36 @@ async function handleMenuCommand(replyToken, userId, text, settings) {
             return true;
             
         case '翻譯歷史':
-            await replyMessage(replyToken, [{
-                type: 'text',
-                text: `📜 翻譯歷史
+            const history = getHistory(userId);
+            if (history.length === 0) {
+                await replyMessage(replyToken, [{
+                    type: 'text',
+                    text: `📜 翻譯歷史
 
-此功能開發中，敬請期待！
+還沒有翻譯記錄
 
-目前可在網頁版查看完整歷史記錄：
-👉 https://travel-translator.railway.app`
-            }]);
+開始翻譯後，記錄會顯示在這裡！
+輸入「重播 1」可重播第 1 筆翻譯的語音`
+                }]);
+            } else {
+                let historyText = '📜 翻譯歷史（最近 10 筆）\n\n';
+                const recent = history.slice(0, 10);
+                recent.forEach((item, i) => {
+                    const icon = item.type === 'voice' ? '🎤' : '⌨️';
+                    const fromName = getLangDisplayName(item.from);
+                    const toName = getLangDisplayName(item.to);
+                    historyText += `${i + 1}. ${icon} ${fromName}→${toName}\n`;
+                    historyText += `   ${item.original.substring(0, 20)}${item.original.length > 20 ? '...' : ''}\n`;
+                    historyText += `   → ${item.translated.substring(0, 20)}${item.translated.length > 20 ? '...' : ''}\n\n`;
+                });
+                historyText += '💡 輸入「重播 1」可重播第 1 筆的語音\n';
+                historyText += '💡 輸入「詳細 1」可查看完整內容';
+                
+                await replyMessage(replyToken, [{
+                    type: 'text',
+                    text: historyText
+                }]);
+            }
             return true;
             
         case '使用說明':
@@ -501,6 +612,24 @@ function getLangDisplayName(code) {
         'tr': '土耳其文'
     };
     return names[code] || code;
+}
+
+// 新增翻譯歷史
+function addHistory(userId, record) {
+    if (!userHistory.has(userId)) {
+        userHistory.set(userId, []);
+    }
+    const history = userHistory.get(userId);
+    history.unshift(record); // 新的在前面
+    if (history.length > MAX_HISTORY) {
+        history.pop(); // 移除最舊的
+    }
+    console.log(`已儲存翻譯歷史: ${userId}, 共 ${history.length} 筆`);
+}
+
+// 取得翻譯歷史
+function getHistory(userId) {
+    return userHistory.get(userId) || [];
 }
 
 // 簡單的語言偵測
