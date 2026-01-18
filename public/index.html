@@ -707,7 +707,8 @@
         }
 
         function detectLang(text, expected) {
-            if (/[\u4e00-\u9fff]/.test(text) && expected.startsWith('zh')) return true;
+            // 台語、客語使用中文字，視為中文系
+            if (/[\u4e00-\u9fff]/.test(text) && (expected.startsWith('zh') || expected === 'nan-TW' || expected === 'hak-TW')) return true;
             if (/[\u3040-\u30ff]/.test(text) && expected === 'ja') return true;
             if (/[\uac00-\ud7af]/.test(text) && expected === 'ko') return true;
             if (/^[a-zA-Z\s\d.,!?'"()-]+$/.test(text) && expected === 'en') return true;

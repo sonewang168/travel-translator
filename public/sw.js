@@ -1,4 +1,4 @@
-const CACHE_NAME = 'travel-translator-v5';
+const CACHE_NAME = 'travel-translator-v6';
 const urlsToCache = [
     '/',
     '/index.html',

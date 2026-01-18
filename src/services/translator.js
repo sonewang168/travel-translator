@@ -146,16 +146,25 @@ async function translateText(text, from, to) {
     // 台語/客語 → 其他語言：當作繁體中文處理
     let actualFrom = from;
     let actualTo = to;
-    let prefix = '';
     
     if (fromLang?.isTaiwanese || fromLang?.isHakka) {
         actualFrom = 'zh-TW';
-        prefix = fromLang.isTaiwanese ? '[台語輸入] ' : '[客語輸入] ';
     }
     
-    // 其他語言 → 台語/客語：翻譯成繁體中文，加上提示
+    // 其他語言 → 台語/客語：翻譯成繁體中文
     if (toLang?.isTaiwanese || toLang?.isHakka) {
         actualTo = 'zh-TW';
+    }
+    
+    // 如果來源和目標相同（例如台語翻客語），直接返回原文
+    if (actualFrom === actualTo) {
+        let result = text;
+        if (toLang?.isTaiwanese) {
+            result = text + '\n\n💡 台語發音請參考中文';
+        } else if (toLang?.isHakka) {
+            result = text + '\n\n💡 客語發音請參考中文';
+        }
+        return { translated: result, engine: 'direct' };
     }
     
     // 歐洲語系優先使用 DeepL
