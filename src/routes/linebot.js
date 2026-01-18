@@ -2,10 +2,12 @@ const express = require('express');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
 const { translateText } = require('../services/translator');
+const { transcribeAudio, mapWhisperLanguage } = require('../services/whisper');
 
 const router = express.Router();
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 const LINE_SECRET = process.env.LINE_CHANNEL_SECRET;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // 使用者設定儲存 (生產環境建議用 Redis)
 const userSettings = new Map();
@@ -175,11 +177,131 @@ async function handleMessage(event) {
     }
     
     if (event.message.type === 'audio') {
-        // 處理語音訊息
+        // 處理語音訊息 - 使用 Whisper 語音辨識
+        await handleAudioMessage(event, replyToken, settings);
+    }
+}
+
+/**
+ * 下載 LINE 音檔
+ */
+async function downloadLineAudio(messageId) {
+    if (!LINE_TOKEN) {
+        throw new Error('LINE_TOKEN 未設定');
+    }
+    
+    const url = `https://api-data.line.me/v2/bot/message/${messageId}/content`;
+    
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${LINE_TOKEN}`
+        }
+    });
+    
+    if (!response.ok) {
+        throw new Error(`下載音檔失敗: ${response.status}`);
+    }
+    
+    const buffer = await response.buffer();
+    console.log(`音檔下載完成: ${buffer.length} bytes`);
+    return buffer;
+}
+
+/**
+ * 處理語音訊息
+ */
+async function handleAudioMessage(event, replyToken, settings) {
+    const messageId = event.message.id;
+    
+    // 檢查是否有 OpenAI API Key
+    if (!OPENAI_API_KEY) {
         await replyMessage(replyToken, [{
             type: 'text',
-            text: '🎤 語音翻譯功能開發中...\n請先用文字輸入！'
+            text: '🎤 語音翻譯功能未啟用\n\n請先用文字輸入！'
         }]);
+        return;
+    }
+    
+    try {
+        // 1. 下載音檔
+        await replyMessage(replyToken, [{
+            type: 'text',
+            text: '🎤 正在辨識語音...'
+        }]);
+        
+        const audioBuffer = await downloadLineAudio(messageId);
+        
+        // 2. 使用 Whisper 語音轉文字
+        const transcription = await transcribeAudio(audioBuffer, 'audio.m4a');
+        
+        if (!transcription.text || transcription.text.trim() === '') {
+            // 辨識失敗或沒聲音 - 但由於已經用掉 replyToken，改用 push
+            console.log('語音辨識結果為空');
+            return;
+        }
+        
+        console.log(`語音辨識: "${transcription.text}" (語言: ${transcription.language})`);
+        
+        // 3. 翻譯
+        const detectedLang = mapWhisperLanguage(transcription.language);
+        const isFromA = detectedLang === settings.from || 
+                        (detectedLang === 'zh-TW' && settings.from.startsWith('zh'));
+        const actualFrom = isFromA ? settings.from : settings.to;
+        const actualTo = isFromA ? settings.to : settings.from;
+        
+        const result = await translateText(transcription.text, actualFrom, actualTo);
+        
+        // 4. 使用 Push Message 回覆（因為 replyToken 已用過）
+        await pushMessage(event.source.userId, [{
+            type: 'text',
+            text: `🎤 語音辨識：
+${transcription.text}
+
+🌏 翻譯結果：
+${result.translated}`
+        }]);
+        
+    } catch (error) {
+        console.error('語音處理錯誤:', error);
+        // 嘗試用 push message 回報錯誤
+        try {
+            await pushMessage(event.source.userId, [{
+                type: 'text',
+                text: '❌ 語音辨識失敗，請再試一次或改用文字輸入'
+            }]);
+        } catch (e) {
+            console.error('Push message 也失敗:', e);
+        }
+    }
+}
+
+/**
+ * 主動推送訊息（不需 replyToken）
+ */
+async function pushMessage(userId, messages) {
+    if (!LINE_TOKEN) {
+        console.log('LINE Push (模擬):', messages);
+        return;
+    }
+    
+    try {
+        const response = await fetch('https://api.line.me/v2/bot/message/push', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${LINE_TOKEN}`
+            },
+            body: JSON.stringify({ 
+                to: userId, 
+                messages 
+            })
+        });
+        
+        if (!response.ok) {
+            console.error('Push message 失敗:', await response.text());
+        }
+    } catch (error) {
+        console.error('Push message 錯誤:', error);
     }
 }
 
@@ -190,9 +312,22 @@ async function handleMenuCommand(replyToken, userId, text, settings) {
     
     switch (text) {
         case '語音翻譯':
+            const hasWhisper = !!OPENAI_API_KEY;
             await replyMessage(replyToken, [{
                 type: 'text',
-                text: `🎤 語音翻譯功能
+                text: hasWhisper 
+                    ? `🎤 語音翻譯模式
+
+✅ 語音翻譯已啟用！
+
+直接按住麥克風錄音傳送，我會：
+1. 辨識你說的話
+2. 自動翻譯成目標語言
+
+目前設定：${fromName} ↔️ ${toName}
+
+💡 支援中、英、日、韓、泰、越等多國語言`
+                    : `🎤 語音翻譯功能
 
 請使用網頁版進行語音翻譯：
 👉 https://travel-translator.railway.app
