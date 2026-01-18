@@ -3,11 +3,15 @@ const crypto = require('crypto');
 const fetch = require('node-fetch');
 const { translateText } = require('../services/translator');
 const { transcribeAudio, mapWhisperLanguage } = require('../services/whisper');
+const { textToSpeech } = require('../services/tts');
 
 const router = express.Router();
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 const LINE_SECRET = process.env.LINE_CHANNEL_SECRET;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || '').trim();
+const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN 
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
+    : (process.env.BASE_URL || 'http://localhost:3000');
 
 // 使用者設定儲存 (生產環境建議用 Redis)
 const userSettings = new Map();
@@ -16,8 +20,6 @@ const userSettings = new Map();
 const langNames = {
     '中文': 'zh-TW', '繁中': 'zh-TW', '繁體': 'zh-TW', '台灣': 'zh-TW',
     '簡中': 'zh-CN', '簡體': 'zh-CN', '中國': 'zh-CN',
-    '台語': 'nan-TW', '閩南語': 'nan-TW', '台': 'nan-TW',
-    '客語': 'hak-TW', '客家語': 'hak-TW', '客': 'hak-TW',
     '英文': 'en', '英語': 'en', '英': 'en',
     '日文': 'ja', '日語': 'ja', '日本': 'ja', '日': 'ja',
     '韓文': 'ko', '韓語': 'ko', '韓國': 'ko', '韓': 'ko',
@@ -224,19 +226,18 @@ async function handleAudioMessage(event, replyToken, settings) {
     
     try {
         // 1. 下載音檔
-        await replyMessage(replyToken, [{
-            type: 'text',
-            text: '🎤 正在辨識語音...'
-        }]);
-        
+        console.log('開始下載音檔...');
         const audioBuffer = await downloadLineAudio(messageId);
         
         // 2. 使用 Whisper 語音轉文字
+        console.log('開始語音辨識...');
         const transcription = await transcribeAudio(audioBuffer, 'audio.m4a');
         
         if (!transcription.text || transcription.text.trim() === '') {
-            // 辨識失敗或沒聲音 - 但由於已經用掉 replyToken，改用 push
-            console.log('語音辨識結果為空');
+            await replyMessage(replyToken, [{
+                type: 'text',
+                text: '🎤 無法辨識語音內容\n\n請再試一次，說話時請靠近麥克風'
+            }]);
             return;
         }
         
@@ -251,27 +252,39 @@ async function handleAudioMessage(event, replyToken, settings) {
         
         const result = await translateText(transcription.text, actualFrom, actualTo);
         
-        // 4. 使用 Push Message 回覆（因為 replyToken 已用過）
-        await pushMessage(event.source.userId, [{
+        // 4. 生成翻譯結果的語音
+        let messages = [{
             type: 'text',
-            text: `🎤 語音辨識：
-${transcription.text}
-
-🌏 翻譯結果：
-${result.translated}`
-        }]);
+            text: `🎤 ${transcription.text}\n\n🌏 ${result.translated}`
+        }];
+        
+        try {
+            console.log('生成 TTS 語音...');
+            const tts = await textToSpeech(result.translated, actualTo);
+            const audioUrl = `${BASE_URL}/audio/${tts.filename}`;
+            
+            console.log(`TTS 音檔 URL: ${audioUrl}`);
+            
+            // 加入語音訊息
+            messages.push({
+                type: 'audio',
+                originalContentUrl: audioUrl,
+                duration: tts.duration
+            });
+        } catch (ttsError) {
+            console.error('TTS 生成失敗，只回覆文字:', ttsError.message);
+            // TTS 失敗時只回覆文字
+        }
+        
+        // 5. 回覆
+        await replyMessage(replyToken, messages);
         
     } catch (error) {
-        console.error('語音處理錯誤:', error);
-        // 嘗試用 push message 回報錯誤
-        try {
-            await pushMessage(event.source.userId, [{
-                type: 'text',
-                text: '❌ 語音辨識失敗，請再試一次或改用文字輸入'
-            }]);
-        } catch (e) {
-            console.error('Push message 也失敗:', e);
-        }
+        console.error('語音處理錯誤:', error.message);
+        await replyMessage(replyToken, [{
+            type: 'text',
+            text: '❌ 語音辨識失敗\n\n請再試一次或改用文字輸入'
+        }]);
     }
 }
 
@@ -362,10 +375,9 @@ async function handleMenuCommand(replyToken, userId, text, settings) {
 • 中英 → 中文↔英文
 • 中日 → 中文↔日文
 • 中韓 → 中文↔韓文
-• 中台 → 中文↔台語
-• 中客 → 中文↔客語
 • 中泰 → 中文↔泰文
 • 中越 → 中文↔越南文
+• 中法 → 中文↔法文
 • 英日 → 英文↔日文
 
 或用指令：/設定 中文 日文`
@@ -422,13 +434,14 @@ async function handleMenuCommand(replyToken, userId, text, settings) {
                 text: `❓ 使用說明
 
 🔹 直接輸入文字即可翻譯
+🔹 傳送語音訊息可語音翻譯
 🔹 自動偵測輸入語言
-🔹 支援 22 種語言
+🔹 支援 20 種語言
 
 📱 支援語言：
-繁中、簡中、台語、客語、英、日、韓、泰、越、印尼、法、德、西、葡、俄、義、阿拉伯、土耳其...
+繁中、簡中、英、日、韓、泰、越、印尼、法、德、西、葡、俄、義、阿拉伯、土耳其...
 
-🌐 網頁版（語音翻譯）：
+🌐 網頁版：
 https://travel-translator.railway.app
 
 💡 小技巧：
@@ -448,8 +461,6 @@ function handleLangSwitch(userId, text) {
         '中英': ['zh-TW', 'en', '中文', '英文'],
         '中日': ['zh-TW', 'ja', '中文', '日文'],
         '中韓': ['zh-TW', 'ko', '中文', '韓文'],
-        '中台': ['zh-TW', 'nan-TW', '中文', '台語'],
-        '中客': ['zh-TW', 'hak-TW', '中文', '客語'],
         '中泰': ['zh-TW', 'th', '中文', '泰文'],
         '中越': ['zh-TW', 'vi', '中文', '越南文'],
         '中法': ['zh-TW', 'fr', '中文', '法文'],
@@ -457,9 +468,7 @@ function handleLangSwitch(userId, text) {
         '中西': ['zh-TW', 'es', '中文', '西班牙文'],
         '英日': ['en', 'ja', '英文', '日文'],
         '英韓': ['en', 'ko', '英文', '韓文'],
-        '日韓': ['ja', 'ko', '日文', '韓文'],
-        '台英': ['nan-TW', 'en', '台語', '英文'],
-        '客英': ['hak-TW', 'en', '客語', '英文']
+        '日韓': ['ja', 'ko', '日文', '韓文']
     };
     
     if (langPairs[text]) {
@@ -476,8 +485,6 @@ function getLangDisplayName(code) {
     const names = {
         'zh-TW': '繁體中文',
         'zh-CN': '簡體中文',
-        'nan-TW': '台語',
-        'hak-TW': '客語',
         'en': '英文',
         'ja': '日文',
         'ko': '韓文',

@@ -333,8 +333,6 @@
                         <span class="language-label">語言 A</span>
                         <select class="language-select" id="langA">
                             <option value="zh-TW">🇹🇼 繁體中文</option>
-                            <option value="nan-TW">🇹🇼 台語(閩南語)</option>
-                            <option value="hak-TW">🇹🇼 客家語</option>
                             <option value="zh-CN">🇨🇳 簡體中文</option>
                             <option value="en">🇺🇸 英文</option>
                             <option value="ja">🇯🇵 日文</option>
@@ -362,8 +360,6 @@
                         <select class="language-select" id="langB">
                             <option value="en">🇺🇸 英文</option>
                             <option value="zh-TW">🇹🇼 繁體中文</option>
-                            <option value="nan-TW">🇹🇼 台語(閩南語)</option>
-                            <option value="hak-TW">🇹🇼 客家語</option>
                             <option value="zh-CN">🇨🇳 簡體中文</option>
                             <option value="ja">🇯🇵 日文</option>
                             <option value="ko">🇰🇷 韓文</option>
@@ -385,7 +381,7 @@
                     <button class="quick-lang-btn" onclick="setQuickLang('en')">🇺🇸 英</button>
                     <button class="quick-lang-btn" onclick="setQuickLang('ja')">🇯🇵 日</button>
                     <button class="quick-lang-btn" onclick="setQuickLang('ko')">🇰🇷 韓</button>
-                    <button class="quick-lang-btn" onclick="setQuickLang('nan-TW')">🇹🇼 台</button>
+                    <button class="quick-lang-btn" onclick="setQuickLang('es')">🇪🇸 西</button>
                     <button class="quick-lang-btn" onclick="setQuickLang('th')">🇹🇭 泰</button>
                     <button class="quick-lang-btn" onclick="setQuickLang('vi')">🇻🇳 越</button>
                 </div>
@@ -462,8 +458,6 @@
         let history = [], settings = { autoSpeak: false, speechSpeed: 1, saveHistory: true };
         const speechLangCodes = { 
             'zh-TW': 'zh-TW', 'zh-CN': 'zh-CN', 
-            'nan-TW': 'zh-TW', // 台語使用台灣中文辨識
-            'hak-TW': 'zh-TW', // 客語使用台灣中文辨識
             'en': 'en-US', 'ja': 'ja-JP', 'ko': 'ko-KR', 
             'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE', 'it': 'it-IT', 
             'pt': 'pt-PT', 'ru': 'ru-RU', 'th': 'th-TH', 'vi': 'vi-VN', 
@@ -707,8 +701,7 @@
         }
 
         function detectLang(text, expected) {
-            // 台語、客語使用中文字，視為中文系
-            if (/[\u4e00-\u9fff]/.test(text) && (expected.startsWith('zh') || expected === 'nan-TW' || expected === 'hak-TW')) return true;
+            if (/[\u4e00-\u9fff]/.test(text) && expected.startsWith('zh')) return true;
             if (/[\u3040-\u30ff]/.test(text) && expected === 'ja') return true;
             if (/[\uac00-\ud7af]/.test(text) && expected === 'ko') return true;
             if (/^[a-zA-Z\s\d.,!?'"()-]+$/.test(text) && expected === 'en') return true;

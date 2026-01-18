@@ -64,7 +64,6 @@ async function transcribeAudio(audioBuffer, filename = 'audio.m4a') {
  */
 const whisperLangMap = {
     'chinese': 'zh-TW',
-    'taiwanese': 'nan-TW',
     'english': 'en',
     'japanese': 'ja',
     'korean': 'ko',

@@ -7,8 +7,6 @@ const DEEPL_API_KEY = process.env.DEEPL_API_KEY;
 const langCodes = {
     'zh-TW': { google: 'zh-TW', deepl: 'ZH', name: '繁體中文' },
     'zh-CN': { google: 'zh-CN', deepl: 'ZH', name: '簡體中文' },
-    'nan-TW': { google: 'zh-TW', deepl: 'ZH', name: '台語(閩南語)', isTaiwanese: true },
-    'hak-TW': { google: 'zh-TW', deepl: 'ZH', name: '客家語', isHakka: true },
     'en': { google: 'en', deepl: 'EN', name: '英文' },
     'ja': { google: 'ja', deepl: 'JA', name: '日文' },
     'ko': { google: 'ko', deepl: 'KO', name: '韓文' },
@@ -130,7 +128,7 @@ async function freeTranslate(text, from, to) {
 }
 
 /**
- * 主翻譯函數 (自動選擇最佳 API + 台語客語特殊處理)
+ * 主翻譯函數 (自動選擇最佳 API)
  */
 async function translateText(text, from, to) {
     if (!text || !from || !to) {
@@ -139,40 +137,12 @@ async function translateText(text, from, to) {
     
     console.log(`翻譯: "${text}" (${from} -> ${to})`);
     
-    // 特殊處理：台語或客語
-    const fromLang = langCodes[from];
-    const toLang = langCodes[to];
-    
-    // 台語/客語 → 其他語言：當作繁體中文處理
-    let actualFrom = from;
-    let actualTo = to;
-    
-    if (fromLang?.isTaiwanese || fromLang?.isHakka) {
-        actualFrom = 'zh-TW';
-    }
-    
-    // 其他語言 → 台語/客語：翻譯成繁體中文
-    if (toLang?.isTaiwanese || toLang?.isHakka) {
-        actualTo = 'zh-TW';
-    }
-    
-    // 如果來源和目標相同（例如台語翻客語），直接返回原文
-    if (actualFrom === actualTo) {
-        let result = text;
-        if (toLang?.isTaiwanese) {
-            result = text + '\n\n💡 台語發音請參考中文';
-        } else if (toLang?.isHakka) {
-            result = text + '\n\n💡 客語發音請參考中文';
-        }
-        return { translated: result, engine: 'direct' };
-    }
-    
     // 歐洲語系優先使用 DeepL
     const europeanLangs = ['en', 'fr', 'de', 'es', 'it', 'pt', 'nl', 'pl', 'ru'];
     const useDeepL = DEEPL_API_KEY && 
-                     europeanLangs.includes(actualTo) && 
-                     langCodes[actualFrom]?.deepl && 
-                     langCodes[actualTo]?.deepl;
+                     europeanLangs.includes(to) && 
+                     langCodes[from]?.deepl && 
+                     langCodes[to]?.deepl;
     
     try {
         let translated;
@@ -181,7 +151,7 @@ async function translateText(text, from, to) {
         // 優先順序: DeepL > Google > Free
         if (useDeepL) {
             try {
-                translated = await deeplTranslate(text, actualFrom, actualTo);
+                translated = await deeplTranslate(text, from, to);
                 engine = 'deepl';
                 console.log(`DeepL 翻譯結果: "${translated}"`);
             } catch (e) {
@@ -191,7 +161,7 @@ async function translateText(text, from, to) {
         
         if (!translated && GOOGLE_API_KEY) {
             try {
-                translated = await googleTranslate(text, actualFrom, actualTo);
+                translated = await googleTranslate(text, from, to);
                 engine = 'google';
                 console.log(`Google 翻譯結果: "${translated}"`);
             } catch (e) {
@@ -200,16 +170,9 @@ async function translateText(text, from, to) {
         }
         
         if (!translated) {
-            translated = await freeTranslate(text, actualFrom, actualTo);
+            translated = await freeTranslate(text, from, to);
             engine = 'mymemory';
             console.log(`免費翻譯結果: "${translated}"`);
-        }
-        
-        // 如果目標是台語/客語，加上提示
-        if (toLang?.isTaiwanese) {
-            translated = translated + '\n\n💡 (已翻譯成中文，台語發音請參考)';
-        } else if (toLang?.isHakka) {
-            translated = translated + '\n\n💡 (已翻譯成中文，客語發音請參考)';
         }
         
         return { translated, engine };
